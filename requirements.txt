@@ -1,0 +1,10 @@
+# Python dependencies for Vercel deployment
+fastapi==0.104.1
+uvicorn==0.24.0
+web3==6.11.0
+requests==2.31.0
+python-dotenv==1.0.0
+beautifulsoup4==4.12.2
+py-solc-x==1.1.1
+mangum==0.17.0
+eth-account==0.10.0

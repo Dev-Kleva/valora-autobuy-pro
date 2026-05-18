@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Kite AI Content Generation Agent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .logout-btn {
+            padding: 8px 16px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .logout-btn:hover {
+            background: #ff5252;
+        }
+        
+        .box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            margin-bottom: 12px;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .secondary {
+            background: #f0f0f0 !important;
+            color: #333 !important;
+        }
+        
+        .secondary:hover {
+            background: #e0e0e0 !important;
+        }
+        
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        h3 {
+            margin-bottom: 12px;
+            color: #555;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .status {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        
+        .content-preview {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 6px;
+            margin: 16px 0;
+            border-left: 4px solid #667eea;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .kite-status {
+            background: #f0fdf4;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid #10b981;
+            margin-bottom: 20px;
+        }
+        
+        .confirm-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        }
+        
+        .confirm-btn:hover {
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4) !important;
+        }
+        
+        .task-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+            margin-bottom: 8px;
+        }
+        
+        .task-item small {
+            color: #999;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .task-item p {
+            color: #555;
+            font-size: 14px;
+            margin: 4px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Kite AI Content Generation Agent</h1>
+            <button class="logout-btn" id="logoutBtn" onclick="logout()" style="display: none;">Logout</button>
+        </div>
+        
+        <!-- Login Screen -->
+        <div id="loginScreen" class="box">
+            <h2>Get Started</h2>
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">Login</button>
+            <button class="secondary" onclick="register()">Register</button>
+        </div>
+        
+        <!-- Main Screen -->
+        <div id="mainScreen" class="hidden">
+            <div class="kite-status" id="kiteStatus"></div>
+            
+            <div class="box">
+                <h2>Generate Content</h2>
+                <textarea id="prompt" placeholder="Enter prompt (e.g., Write a blog post about AI)" rows="4"></textarea>
+                <button onclick="generateContent()" id="generateBtn">Generate Content</button>
+            </div>
+            
+            <div class="box" id="tasksBox" style="display: none;">
+                <h3>Your Tasks (<span id="taskCount">0</span>)</h3>
+                <div id="tasksList"></div>
+            </div>
+            
+            <div class="box" id="attestationsBox" style="display: none;">
+                <h3>Kite Attestations (<span id="attestationCount">0</span>)</h3>
+                <div id="attestationsList"></div>
+            </div>
+        </div>
+        
+        <!-- Confirm Screen -->
+        <div id="confirmScreen" class="hidden">
+            <div class="box">
+                <h2>✨ Content Generated!</h2>
+                
+                <h3>Generated Content:</h3>
+                <div class="content-preview" id="contentDisplay"></div>
+                
+                <div>
+                    <p><strong>Output Hash:</strong> <code id="outputHash"></code></p>
+                    <p><strong>Tokens Used:</strong> <span id="tokensUsed"></span></p>
+                    <p><strong>Model:</strong> <span id="modelName"></span></p>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 20px; border-radius: 6px; border: 2px solid #667eea; margin-top: 20px;">
+                    <h3>⚙️ Settle Payment on Kite</h3>
+                    <p>Amount: <strong id="paymentAmount"></strong> USDC</p>
+                    <p style="background: white; padding: 12px; border-radius: 4px; border-left: 3px solid #f59e0b; color: #92400e; font-weight: 500; margin-top: 12px;">
+                        🔗 Payment will be settled on Kite AI Chain with attestation proof
+                    </p>
+                    <button class="confirm-btn" onclick="confirmGeneration()" id="confirmBtn">Confirm & Settle on Kite</button>
+                    <button class="secondary" onclick="backToGenerate()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = "http://localhost:8000";
+        let token = null;
+        let currentPayment = null;
+        
+        async function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            
+            if (!username || !password) {
+                alert("Enter username and password");
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_BASE}/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                if (!res.ok) throw new Error("Login failed");
+                const data = await res.json();
+                token = data.token;
+                showMainScreen();
+                checkKiteHealth();
+            } catch (e) {
+                alert(`Login failed: ${e.message}`);
+            }
+        }
+        
+        async function register() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            
+            if (!username || !password) {
+                alert("Enter username and password");
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_BASE}/register`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                if (!res.ok) throw new Error("Registration failed");
+                const data = await res.json();
+                token = data.token;
+                showMainScreen();
+                checkKiteHealth();
+            } catch (e) {
+                alert(`Registration failed: ${e.message}`);
+            }
+        }
+        
+        async function generateContent() {
+            const prompt = document.getElementById("prompt").value;
+            if (!prompt.trim()) {
+                alert("Enter a prompt");
+                return;
+            }
+            
+            document.getElementById("generateBtn").disabled = true;
+            
+            try {
+                const res = await fetch(`${API_BASE}/generate`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ prompt })
+                });
+                
+                if (!res.ok) throw new Error("Generation failed");
+                const data = await res.json();
+                
+                currentPayment = data;
+                document.getElementById("contentDisplay").textContent = data.generated_content;
+                document.getElementById("outputHash").textContent = data.output_hash.substring(0, 30) + "...";
+                document.getElementById("tokensUsed").textContent = data.tokens_used;
+                document.getElementById("modelName").textContent = data.model;
+                document.getElementById("paymentAmount").textContent = `$${data.payment_amount_usdc.toFixed(2)}`;
+                
+                showConfirmScreen();
+            } catch (e) {
+                alert(`Generation failed: ${e.message}`);
+            } finally {
+                document.getElementById("generateBtn").disabled = false;
+            }
+        }
+        
+        async function confirmGeneration() {
+            if (!currentPayment) return;
+            
+            document.getElementById("confirmBtn").disabled = true;
+            
+            try {
+                const res = await fetch(`${API_BASE}/confirm-generation`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        task_id: currentPayment.task_id,
+                        payment_amount_usdc: currentPayment.payment_amount_usdc,
+                        vendor_address: "0x742d35Cc6634C0532925a3b844Bc89e7595f42A"
+                    })
+                });
+                
+                if (!res.ok) throw new Error("Confirmation failed");
+                
+                alert("✅ Content generated and payment settled on Kite AI!");
+                
+                document.getElementById("prompt").value = "";
+                currentPayment = null;
+                
+                await loadUserTasks();
+                backToGenerate();
+            } catch (e) {
+                alert(`Confirmation failed: ${e.message}`);
+            } finally {
+                document.getElementById("confirmBtn").disabled = false;
+            }
+        }
+        
+        async function checkKiteHealth() {
+            try {
+                const res = await fetch(`${API_BASE}/kite/health`);
+                const data = await res.json();
+                document.getElementById("kiteStatus").innerHTML = 
+                    `🔗 Kite: <strong>${data.status}</strong> on ${data.network}`;
+            } catch (e) {
+                console.error("Kite health check failed:", e);
+            }
+        }
+        
+        async function loadUserTasks() {
+            try {
+                const res = await fetch(`${API_BASE}/tasks`, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+                
+                if (!res.ok) return;
+                const data = await res.json();
+                
+                if (data.tasks.length > 0) {
+                    document.getElementById("taskCount").textContent = data.tasks.length;
+                    document.getElementById("tasksList").innerHTML = data.tasks.map(t => `
+                        <div class="task-item">
+                            <small>ID: ${t.task_id.substring(0, 20)}...</small>
+                            <p>Prompt: ${t.prompt.substring(0, 50)}...</p>
+                            <small>Tokens: ${t.tokens_used}</small>
+                        </div>
+                    `).join("");
+                    document.getElementById("tasksBox").style.display = "block";
+                }
+                
+                if (data.attestations.length > 0) {
+                    document.getElementById("attestationCount").textContent = data.attestations.length;
+                    document.getElementById("attestationsList").innerHTML = data.attestations.map(a => `
+                        <div style="background: #f0fdf4; padding: 12px; border-radius: 6px; border-left: 3px solid #10b981; margin-bottom: 8px;">
+                            <p>✅ Task: ${a.task_id.substring(0, 20)}...</p>
+                            <p>Hash: ${a.output_hash.substring(0, 20)}...</p>
+                            <p>Status: <strong>${a.status}</strong></p>
+                            <small>${new Date(a.timestamp).toLocaleString()}</small>
+                        </div>
+                    `).join("");
+                    document.getElementById("attestationsBox").style.display = "block";
+                }
+            } catch (e) {
+                console.error("Failed to load tasks:", e);
+            }
+        }
+        
+        function showMainScreen() {
+            document.getElementById("loginScreen").classList.add("hidden");
+            document.getElementById("mainScreen").classList.remove("hidden");
+            document.getElementById("confirmScreen").classList.add("hidden");
+            document.getElementById("logoutBtn").style.display = "block";
+            loadUserTasks();
+        }
+        
+        function showConfirmScreen() {
+            document.getElementById("mainScreen").classList.add("hidden");
+            document.getElementById("confirmScreen").classList.remove("hidden");
+        }
+        
+        function backToGenerate() {
+            document.getElementById("confirmScreen").classList.add("hidden");
+            document.getElementById("mainScreen").classList.remove("hidden");
+        }
+        
+        function logout() {
+            token = null;
+            document.getElementById("loginScreen").classList.remove("hidden");
+            document.getElementById("mainScreen").classList.add("hidden");
+            document.getElementById("confirmScreen").classList.add("hidden");
+            document.getElementById("logoutBtn").style.display = "none";
+            document.getElementById("username").value = "";
+            document.getElementById("password").value = "";
+        }
+    </script>
+</body>
+</html>

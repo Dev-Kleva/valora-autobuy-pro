@@ -1,0 +1,620 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+.App {
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+  font-size: 28px;
+  color: #333;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.logout-btn {
+  padding: 8px 16px;
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.logout-btn:hover {
+  background: #ff5252;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+}
+
+.auth-box {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-box h2 {
+  margin-bottom: 24px;
+  color: #333;
+}
+
+.auth-box input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.auth-box input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.auth-box input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.auth-box button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+}
+
+.auth-box button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.auth-box button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.secondary {
+  background: #f0f0f0 !important;
+  color: #333 !important;
+}
+
+.secondary:hover {
+  background: #e0e0e0 !important;
+}
+
+.kite-status {
+  background: white;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border-left: 4px solid #667eea;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.kite-status p {
+  color: #555;
+  font-weight: 500;
+}
+
+.generator-box {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.generator-box h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.generator-box textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.generator-box textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.generator-box button {
+  margin-top: 12px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+}
+
+.generator-box button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.generator-box button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.history-box {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.history-box h3 {
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.task-list {
+  display: grid;
+  gap: 12px;
+}
+
+.task-item {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 3px solid #667eea;
+}
+
+.task-item small {
+  color: #999;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.task-item p {
+  color: #555;
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.content-preview {
+  color: #888 !important;
+  font-style: italic;
+}
+
+.attestations-box {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.attestations-box h3 {
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.attestation-list {
+  display: grid;
+  gap: 12px;
+}
+
+.attestation-item {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 3px solid #667eea;
+}
+
+.hero-subtitle {
+  margin-top: 12px;
+  color: #555;
+  max-width: 720px;
+  line-height: 1.6;
+}
+
+.auth-copy {
+  margin-bottom: 20px;
+  color: #555;
+  line-height: 1.6;
+}
+
+.passport-setup-box {
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  margin-bottom: 30px;
+}
+
+.passport-setup-box h2 {
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.passport-setup-box p {
+  margin-bottom: 18px;
+  color: #555;
+  line-height: 1.7;
+}
+
+.passport-steps {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.passport-step {
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px solid #e8ecff;
+  background: #fbfcff;
+}
+
+.passport-step strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #222;
+}
+
+.passport-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.passport-actions .primary,
+.passport-actions .secondary {
+  flex: 1;
+}
+
+.passport-summary {
+  background: white;
+  padding: 22px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.passport-summary h2 {
+  margin-bottom: 14px;
+  color: #333;
+}
+
+.passport-summary ul {
+  list-style: disc inside;
+  color: #555;
+  line-height: 1.8;
+}
+
+.payment-summary {
+  margin: 20px 0;
+  padding: 16px;
+  background: #f5f7ff;
+  border-left: 4px solid #667eea;
+  border-radius: 10px;
+  color: #333;
+  line-height: 1.6;
+}
+
+.payment-message {
+  margin: 16px 0;
+  padding: 14px;
+  background: #eef3ff;
+  border-left: 4px solid #667eea;
+  border-radius: 10px;
+  color: #333;
+}
+
+.product-link {
+  color: #667eea;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.product-link:hover {
+  text-decoration: underline;
+}
+
+.attestation-item {  background: #f0fdf4;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 3px solid #10b981;
+}
+
+.attestation-item p {
+  color: #333;
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.attestation-item small {
+  color: #777;
+}
+
+.product-search-box {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.product-search-box h2 {
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.product-search-box input {
+  width: 48%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-right: 4%;
+  margin-bottom: 12px;
+}
+
+.product-search-box input:last-of-type {
+  margin-right: 0;
+}
+
+.product-search-box button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.product-search-box .product-results {
+  margin-top: 14px;
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+}
+
+.product-search-box .product-results p {
+  color: #333;
+  margin: 6px 0;
+}
+
+.product-search-box .product-results ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.product-search-box .product-results li {
+  margin-bottom: 8px;
+  padding: 8px;
+  background: #f7f7ff;
+  border-radius: 6px;
+}
+
+.product-search-box .error {
+  color: #c53030;
+  font-weight: 600;
+}
+
+.attestation-item small {
+  color: #999;
+  display: block;
+}
+
+.confirm-box {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.confirm-box h2 {
+  margin-bottom: 24px;
+  color: #333;
+}
+
+.confirm-box h3 {
+  margin-top: 20px;
+  margin-bottom: 12px;
+  color: #555;
+}
+
+.content-display {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border-left: 4px solid #667eea;
+}
+
+.content-display p {
+  color: #333;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.details {
+  background: #f0f0f0;
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.details p {
+  margin: 8px 0;
+  color: #555;
+  font-size: 14px;
+}
+
+.details code {
+  background: white;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: "Courier New", monospace;
+  color: #667eea;
+}
+
+.payment-box {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  padding: 20px;
+  border-radius: 6px;
+  border: 2px solid #667eea;
+}
+
+.payment-box p {
+  color: #333;
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+.payment-box strong {
+  color: #667eea;
+  font-size: 18px;
+}
+
+.kite-note {
+  background: white;
+  padding: 12px;
+  border-radius: 4px;
+  border-left: 3px solid #f59e0b;
+  color: #92400e !important;
+  font-weight: 500;
+}
+
+.confirm-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 16px;
+  margin-bottom: 12px;
+}
+
+.confirm-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.confirm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+  }
+
+  .auth-box {
+    padding: 24px;
+  }
+
+  .generator-box,
+  .history-box,
+  .attestations-box,
+  .confirm-box {
+    padding: 20px;
+  }
+}
+
+/* Payment Summary Styles */
+.payment-summary {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.payment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.payment-item:last-child {
+  border-bottom: none;
+}
+
+.payment-label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 14px;
+}
+
+.payment-value {
+  font-family: 'Courier New', monospace;
+  color: #212529;
+  font-size: 14px;
+  font-weight: 500;
+}
