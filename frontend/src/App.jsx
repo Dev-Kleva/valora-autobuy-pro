@@ -26,7 +26,8 @@ export default function App() {
   const [settlements, setSettlements] = useState([]);
   const [remainingBudget, setRemainingBudget] = useState(null);
 
-  const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8001";
+  const isLocalhost = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+  const API_BASE = process.env.REACT_APP_API_URL || (isLocalhost ? "http://localhost:8001" : "/api");
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
   const handleRegister = async () => {

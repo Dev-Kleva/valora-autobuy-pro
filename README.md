@@ -101,6 +101,16 @@ REACT_APP_KITE_AA_RPC_URL=https://rpc.gokite.ai/
 REACT_APP_KITE_AA_BUNDLER_RPC=https://bundler-service.staging.gokite.ai/rpc/
 ```
 
+For Vercel production deployment, set `REACT_APP_API_URL=/api` so the frontend calls the backend through the Vercel API routes.
+
+If you prefer, you can also use the included `frontend/.env.production` file:
+
+```env
+REACT_APP_API_URL=/api
+REACT_APP_CHAIN_ID=2366
+REACT_APP_RPC_URL=https://rpc.gokite.ai/
+```
+
 Start the frontend:
 
 ```bash
@@ -124,6 +134,21 @@ Open `http://localhost:3000`.
 - `VALORA_TREASURY_ADDRESS`
 - `KITE_PASSPORT_BASE_URL`
 - `APP_BASE_URL`
+
+### Vercel: Backend environment variables (recommended)
+Set these in your Vercel project settings under "Environment Variables" for Production and Preview environments:
+
+- `VALORA_TREASURY_ADDRESS`: The Valora treasury KITE wallet address that receives service fees (required).
+- `KITE_PASSPORT_BASE_URL`: Passport API base URL (e.g. `https://passport.dev.gokite.ai`) (required).
+- `APP_BASE_URL`: Public URL for the deployed app (e.g. `https://your-app.vercel.app`) (recommended).
+- `AGENT_PRIVATE_KEY`: Optional private key for `kpass`-style agent execution (use with caution).
+- `KITE_RPC_URL`: RPC URL for Kite network (optional; default in code is used if unset).
+- `USDC_ADDRESS`: Stablecoin contract address used for settlement (optional; default provided in repo).
+- `JWT_SECRET`: Secret for signing backend JWT tokens (required for production).
+
+Notes:
+- Keep secrets like `AGENT_PRIVATE_KEY` and `JWT_SECRET` private and use Vercel's encrypted env var UI.
+- For quick testing, you can set these in Preview or Development; for production, ensure values match your live Kite Passport and treasury configuration.
 
 ### Frontend
 - `REACT_APP_API_URL`

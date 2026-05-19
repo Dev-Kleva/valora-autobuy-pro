@@ -1,4 +1,4 @@
-import { GokiteAASDK } from "gokite-aa-sdk";
+import { GokiteAASDK } from "./shims/gokite-aa-sdk-browser.js";
 import { Wallet, Interface, getBytes } from "ethers";
 
 const KITE_AA_NETWORK = process.env.REACT_APP_KITE_AA_NETWORK || "kite_mainnet";

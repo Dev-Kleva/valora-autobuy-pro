@@ -95,3 +95,5 @@ build/
 out/
 
 .kite-passport/
+.vercel
+.env*.local

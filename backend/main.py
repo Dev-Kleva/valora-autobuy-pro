@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Header, Depends
+from fastapi import FastAPI, HTTPException, Header, Depends, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
@@ -79,6 +79,15 @@ if not Web3.is_address(VALORA_TREASURY_ADDRESS):
     )
 
 app = FastAPI(title="AutoBuy Agent")
+
+@app.middleware("http")
+async def strip_api_prefix(request: Request, call_next):
+    if request.scope["path"].startswith("/api/"):
+        request.scope["path"] = request.scope["path"][4:]
+        raw_path = request.scope.get("raw_path")
+        if raw_path is not None:
+            request.scope["raw_path"] = raw_path[4:]
+    return await call_next(request)
 
 # Store pending product URLs until payment completes
 APP_BASE_URL = os.getenv("APP_BASE_URL", "http://localhost:8001")

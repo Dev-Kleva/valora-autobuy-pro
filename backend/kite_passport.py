@@ -2,6 +2,7 @@ import requests
 import json
 import os
 import shutil
+import shlex
 import subprocess
 from typing import Dict, Optional, List
 import logging
@@ -23,6 +24,9 @@ class KitePassport:
 
     def __init__(self, base_url: Optional[str] = None):
         self.base_url = base_url or os.getenv("KITE_PASSPORT_BASE_URL") or "https://passport.dev.gokite.ai"
+        self.wsl_distro = None
+        self.wsl_user = None
+        self.wsl_exe = None
         self._load_config()
         self.kpass_path = self._find_kpass_executable()
         print(f"Debug: resolved kpass path = {self.kpass_path}")
@@ -51,10 +55,99 @@ class KitePassport:
         except Exception as e:
             raise RuntimeError(f"Failed to load Passport config: {str(e)}")
 
+    def _decode_wsl_output(self, raw: Optional[bytes]) -> str:
+        """Decode wsl.exe output, handling UTF-16-LE with null bytes."""
+        if raw is None:
+            return ""
+        if b"\x00" in raw:
+            try:
+                return raw.decode('utf-16-le', errors='ignore').strip()
+            except UnicodeDecodeError:
+                return raw.decode('utf-16', errors='ignore').strip()
+        try:
+            return raw.decode('utf-8', errors='ignore').strip()
+        except UnicodeDecodeError:
+            return raw.decode('latin-1', errors='ignore').strip()
+
+    def _find_wsl_executable(self) -> Optional[str]:
+        """Find the WSL executable even when System32 redirection hides it."""
+        wsl_exe = shutil.which("wsl")
+        if wsl_exe:
+            return wsl_exe
+
+        windows_dir = os.environ.get("SYSTEMROOT") or os.environ.get("WINDIR") or "C:\\Windows"
+        candidates = [
+            os.path.join(windows_dir, "System32", "wsl.exe"),
+            os.path.join(windows_dir, "Sysnative", "wsl.exe"),
+            os.path.join(windows_dir, "SysWOW64", "wsl.exe"),
+        ]
+        for candidate in candidates:
+            if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+                return candidate
+        return None
+
+    def _get_wsl_users(self, wsl_exe: str, distro: str) -> List[Dict[str, str]]:
+        """Enumerate non-system users inside a WSL distro."""
+        try:
+            result = subprocess.run(
+                [wsl_exe, "-d", distro, "bash", "-lc",
+                 "awk -F: '$3>=1000 && $1 != \"nobody\" {print $1 \"\x1f\" $6}' /etc/passwd"],
+                capture_output=True,
+                timeout=10,
+            )
+            output = self._decode_wsl_output(result.stdout)
+            users = []
+            for line in output.splitlines():
+                if "\x1f" not in line:
+                    continue
+                username, homedir = line.split("\x1f", 1)
+                users.append({"name": username.strip(), "home": homedir.strip()})
+            return users
+        except (subprocess.SubprocessError, OSError):
+            return []
+
+    def _find_kpass_in_wsl(self, wsl_exe: str, distro: str, user: Optional[str] = None) -> Optional[str]:
+        """Find a kpass executable inside a WSL distro and optional user session."""
+        cmd = [wsl_exe, "-d", distro]
+        if user:
+            cmd += ["-u", user]
+        cmd += ["bash", "-lc", "command -v kpass"]
+        try:
+            result = subprocess.run(cmd, capture_output=True, timeout=10)
+            if result.returncode == 0:
+                return self._decode_wsl_output(result.stdout)
+        except (subprocess.SubprocessError, OSError):
+            pass
+        return None
+
+    def _find_kpass_in_wsl_home(self, wsl_exe: str, distro: str, home_dir: str) -> Optional[str]:
+        """Check common install locations under a WSL home directory."""
+        paths = [
+            os.path.join(home_dir, ".local", "bin", "kpass"),
+            os.path.join(home_dir, ".kpass", "bin", "kpass"),
+        ]
+        for candidate in paths:
+            cmd = [wsl_exe, "-d", distro, "bash", "-lc", f"if [ -x '{candidate}' ]; then printf '%s' '{candidate}'; fi"]
+            try:
+                result = subprocess.run(cmd, capture_output=True, timeout=10)
+                candidate_path = self._decode_wsl_output(result.stdout)
+                if candidate_path:
+                    return candidate_path
+            except (subprocess.SubprocessError, OSError):
+                pass
+        return None
+
     def _find_kpass_executable(self) -> str:
         """Resolve the kpass executable path from the current environment."""
         import platform
         is_windows = platform.system() == "Windows"
+        is_wsl = False
+
+        try:
+            with open('/proc/version', 'r') as f:
+                is_wsl = 'microsoft' in f.read().lower()
+        except OSError:
+            pass
 
         env_path = os.getenv("KITE_PASSPORT_CLI_PATH")
         if env_path and os.path.isfile(env_path) and os.access(env_path, os.X_OK):
@@ -70,28 +163,87 @@ class KitePassport:
             os.path.expanduser("~/.local/bin/kpass.exe"),
             os.path.expanduser("~/.kpass/bin/kpass"),
             os.path.expanduser("~/.kpass/bin/kpass.exe"),
+            "/usr/local/bin/kpass",
+            "/usr/bin/kpass",
         ]
         for path in possible_paths:
             if path and os.path.isfile(path) and os.access(path, os.X_OK):
                 return path
 
-        # On Windows, try WSL paths if running from WSL environment
+        # If running on Windows, try to see whether kpass is installed inside WSL.
         if is_windows:
-            # Check if we're actually running in WSL (when Python is called from WSL)
-            try:
-                with open('/proc/version', 'r') as f:
-                    if 'microsoft' in f.read().lower():
-                        # We're in WSL, check WSL paths
-                        wsl_paths = [
-                            "/home/paul/.local/bin/kpass",
-                            "/usr/local/bin/kpass",
-                            "/usr/bin/kpass"
-                        ]
-                        for wsl_path in wsl_paths:
-                            if os.path.isfile(wsl_path) and os.access(wsl_path, os.X_OK):
-                                return wsl_path
-            except:
-                pass
+            wsl_exe = self._find_wsl_executable()
+            self.wsl_exe = wsl_exe
+            if wsl_exe:
+                try:
+                    distro_result = subprocess.run(
+                        [wsl_exe, "-l", "-q"],
+                        capture_output=True,
+                        timeout=10,
+                    )
+                    distro_stdout = self._decode_wsl_output(distro_result.stdout)
+                    distros = [line.strip() for line in distro_stdout.splitlines() if line.strip() and not line.strip().startswith("docker-")]
+                except (subprocess.SubprocessError, OSError):
+                    distros = []
+
+                env_user = os.getenv("KITE_PASSPORT_WSL_USER")
+                candidate_users = [env_user] if env_user else []
+
+                for distro in distros:
+                    # First try the explicitly configured WSL user.
+                    for user in candidate_users:
+                        if not user:
+                            continue
+                        wsl_kpass = self._find_kpass_in_wsl(wsl_exe, distro, user)
+                        if wsl_kpass:
+                            self.wsl_distro = distro
+                            self.wsl_user = user
+                            return wsl_kpass
+
+                    distro_users = self._get_wsl_users(wsl_exe, distro)
+                    for user_info in distro_users:
+                        user = user_info.get("name")
+                        if not user or user in candidate_users:
+                            continue
+                        wsl_kpass = self._find_kpass_in_wsl(wsl_exe, distro, user)
+                        if wsl_kpass:
+                            self.wsl_distro = distro
+                            self.wsl_user = user
+                            return wsl_kpass
+
+                        home_dir = user_info.get("home")
+                        if home_dir:
+                            home_path = self._find_kpass_in_wsl_home(wsl_exe, distro, home_dir)
+                            if home_path:
+                                self.wsl_distro = distro
+                                self.wsl_user = user
+                                return home_path
+
+                    # Finally try the default distro shell.
+                    wsl_kpass = self._find_kpass_in_wsl(wsl_exe, distro, None)
+                    if wsl_kpass:
+                        self.wsl_distro = distro
+                        return wsl_kpass
+
+                    for user_info in distro_users:
+                        home_dir = user_info.get("home")
+                        if home_dir:
+                            home_path = self._find_kpass_in_wsl_home(wsl_exe, distro, home_dir)
+                            if home_path:
+                                self.wsl_distro = distro
+                                self.wsl_user = user_info.get("name")
+                                return home_path
+
+        if is_windows or is_wsl:
+            wsl_paths = [
+                os.path.expanduser("~/.local/bin/kpass"),
+                os.path.expanduser("~/.kpass/bin/kpass"),
+                "/usr/local/bin/kpass",
+                "/usr/bin/kpass",
+            ]
+            for wsl_path in wsl_paths:
+                if wsl_path and os.path.isfile(wsl_path) and os.access(wsl_path, os.X_OK):
+                    return wsl_path
 
         raise RuntimeError(
             "kpass CLI is not installed or not found in PATH. "
@@ -171,13 +323,21 @@ class KitePassport:
         if not args:
             return {"error": "No command specified"}
 
-        # Check if we're on Windows and kpass is in WSL
+        # Check if we're on Windows and the resolved path points into WSL.
         import platform
         is_windows = platform.system() == "Windows"
 
-        if is_windows and "home" in self.kpass_path:
-            # Use WSL to run kpass commands directly (assuming kpass is in WSL PATH)
-            cmd = ["wsl", "kpass"] + args
+        if is_windows and self.kpass_path.startswith("/"):
+            wsl_exe = self.wsl_exe or shutil.which("wsl")
+            if not wsl_exe:
+                raise RuntimeError("WSL executable not found while attempting to run kpass in WSL.")
+
+            cmd = [wsl_exe]
+            if self.wsl_distro:
+                cmd += ["-d", self.wsl_distro]
+            if self.wsl_user:
+                cmd += ["-u", self.wsl_user]
+            cmd += ["bash", "-lc", shlex.join([self.kpass_path] + args)]
         else:
             cmd = [self.kpass_path] + args
 

@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
     "axios": "^1.6.0",
     "ethers": "^6.0.0",
     "gokite-aa-sdk": "^1.0.15",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -16,6 +16,11 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
+  },
+  "browser": {
+    "dotenv": "./src/shims/dotenv-browser.js",
+    "dotenv/config": "./src/shims/dotenv-browser.js",
+    "gokite-aa-sdk": "./src/shims/gokite-aa-sdk-browser.js"
   },
   "eslintConfig": {
     "extends": [
