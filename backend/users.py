@@ -3,7 +3,11 @@ import sqlite3
 import os
 from typing import Optional
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "autobuy.db")
+import tempfile
+
+DB_PATH = os.environ.get("SQLITE_DB_PATH")
+if not DB_PATH:
+    DB_PATH = os.path.join(tempfile.gettempdir(), "autobuy.db")
 
 
 def init_db():
