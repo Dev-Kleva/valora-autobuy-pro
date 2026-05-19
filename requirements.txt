@@ -1,6 +1,9 @@
 # Python dependencies for Vercel deployment
 fastapi==0.104.1
-uvicorn==0.24.0setuptools>=68.0.0web3==6.11.0
+uvicorn==0.24.0
+setuptools>=68.0.0
+wheel==0.41.2
+web3==6.11.0
 requests==2.31.0
 python-dotenv==1.0.0
 beautifulsoup4==4.12.2
