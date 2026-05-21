@@ -4,7 +4,7 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), 'backend'))
 
-from agent import decide_purchase
+from backend.agent import decide_purchase
 
 def test_decide_purchase():
     """Test the decide_purchase function with multi-platform search"""
