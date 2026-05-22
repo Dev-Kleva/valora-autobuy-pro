@@ -579,7 +579,7 @@ async def confirm_payment(request: dict, user=Depends(get_current_user)):
 
 # ============ BLOCKCHAIN WALLET ENDPOINTS ============
 
-from .blockchain_requirements import wallet_service
+from blockchain_requirements import wallet_service
 
 @app.post("/wallet/check-requirements")
 async def check_wallet_requirements(request: dict, user=Depends(get_current_user)):
