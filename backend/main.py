@@ -45,26 +45,26 @@ def save_pending_purchase_links():
 pending_purchase_links = load_pending_purchase_links()
 
 # Existing imports
-from agent import decide_purchase
-from constraints import validate
-from subscriptions import (
+from .agent import decide_purchase
+from .constraints import validate
+from .subscriptions import (
     create_subscription, get_subscription, cancel_subscription,
     pause_subscription, resume_subscription, get_due_subscriptions,
     update_subscription_charge
 )
-from kite_passport import get_passport
-from users import register_user, authenticate_user, get_user_by_token
+from .kite_passport import get_passport
+from .users import register_user, authenticate_user, get_user_by_token
 
 # New imports
-from kite_settlement import (
+from .kite_settlement import (
     record_attestation_on_kite, settle_payment_on_kite,
     verify_kite_attestation, get_user_attestations, kite_health_check
 )
-from blockchain_payment import (
+from .blockchain_payment import (
     payment_processor, MIN_STABLECOIN_CHARGE,
     STABLECOIN_ADDRESS, PAYMENT_TOKEN_SYMBOL, KITE_CHAIN_ID, KITE_RPC
 )
-from kite import get_settlements
+from .kite import get_settlements
 from web3 import Web3
 
 if not VALORA_TREASURY_ADDRESS:
@@ -308,7 +308,7 @@ async def buy(request: dict, user=Depends(get_current_user)):
     # Enforce budget caps and explicit range constraints (defensive guard)
     budget = float(request.get("budget", 0))
 
-    from agent import parse_price_range
+    from .agent import parse_price_range
     min_price, max_price, _ = parse_price_range(request.get("query", ""), budget)
     max_price = min(max_price, budget)
 
@@ -579,7 +579,7 @@ async def confirm_payment(request: dict, user=Depends(get_current_user)):
 
 # ============ BLOCKCHAIN WALLET ENDPOINTS ============
 
-from blockchain_requirements import wallet_service
+from .blockchain_requirements import wallet_service
 
 @app.post("/wallet/check-requirements")
 async def check_wallet_requirements(request: dict, user=Depends(get_current_user)):
