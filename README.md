@@ -224,7 +224,7 @@ docker run -p 8001:8001 \
 2. Go to railway.app
 3. Connect your repo
 4. Set environment variables
-5. Deploy (auto-starts `uvicorn main:app`)
+5. Deploy (Railway will use the `Procfile` and run `bash backend/start.sh`)
 
 **Deploy Frontend to Vercel:**
 1. Push to GitHub
@@ -234,6 +234,8 @@ docker run -p 8001:8001 \
 5. Deploy
 
 ### Option 2: Heroku (All-in-one)
+
+This repo includes a `Procfile` so Heroku will run `bash backend/start.sh` instead of launching `uvicorn` directly.
 
 ```bash
 heroku login
