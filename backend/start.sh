@@ -22,6 +22,17 @@ echo "Checking config..."
 ls -la ~/.kite-passport || true
 ls -la /app/.kite-passport || true
 
+# If Passport config exists in the container home directory, mirror it into /app for the backend.
+if [ -f "$HOME/.kite-passport/config.json" ] && [ ! -f "/app/.kite-passport/config.json" ]; then
+  echo "Copying Passport config from $HOME/.kite-passport to /app/.kite-passport"
+  mkdir -p /app/.kite-passport
+  cp -r "$HOME/.kite-passport/." /app/.kite-passport/
+fi
+
+if [ ! -f "$HOME/.kite-passport/config.json" ] && [ ! -f "/app/.kite-passport/config.json" ]; then
+  echo "WARNING: Passport config missing. Mount ~/.kite-passport or set KITE_PASSPORT_CONFIG_PATH to a valid config.json."
+fi
+
 echo "Starting backend..."
 
 PORT=${PORT:-8080}
