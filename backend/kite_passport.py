@@ -35,16 +35,31 @@ class KitePassport:
         """Load Passport configuration from .kite-passport directory."""
         print("Debug: in _load_config")
         print(f"Debug: cwd = {os.getcwd()}")
-        config_dir = os.path.join(os.getcwd(), ".kite-passport")
-        config_file = os.path.join(config_dir, "config.json")
-        print(f"Debug: config_file = {config_file}")
-        print(f"Debug: exists = {os.path.exists(config_file)}")
 
-        if not os.path.exists(config_file):
+        env_config_path = os.getenv("KITE_PASSPORT_CONFIG_PATH") or os.getenv("KITE_PASSPORT_CONFIG_FILE")
+        home_config = os.path.expanduser("~/.kite-passport/config.json")
+        cwd_config = os.path.join(os.getcwd(), ".kite-passport", "config.json")
+
+        config_candidates = []
+        if env_config_path:
+            config_candidates.append(env_config_path)
+        config_candidates.extend([cwd_config, home_config])
+
+        config_file = None
+        for candidate in config_candidates:
+            print(f"Debug: checking config candidate = {candidate}")
+            if os.path.exists(candidate):
+                config_file = candidate
+                break
+
+        if not config_file:
             raise RuntimeError(
                 "Kite Passport not configured. Please run: "
                 "curl -fsSL https://agentpassport.ai/install.sh | bash"
             )
+
+        print(f"Debug: config_file = {config_file}")
+        print(f"Debug: exists = {os.path.exists(config_file)}")
 
         try:
             with open(config_file, 'r') as f:

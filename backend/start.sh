@@ -10,8 +10,13 @@ export PATH="$HOME/.local/bin:$PATH"
 
 echo "Initializing Kite Passport..."
 
-# THIS is the missing step (critical)
-kite-passport init || true
+if command -v kpass >/dev/null 2>&1; then
+  kpass init || true
+elif command -v kite-passport >/dev/null 2>&1; then
+  kite-passport init || true
+else
+  echo "WARNING: kpass CLI not found after install"
+fi
 
 echo "Checking config..."
 ls -la ~/.kite-passport || true
