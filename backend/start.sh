@@ -29,6 +29,11 @@ if [ -f "$HOME/.kite-passport/config.json" ] && [ ! -f "/app/.kite-passport/conf
   cp -r "$HOME/.kite-passport/." /app/.kite-passport/
 fi
 
+if [ -f "/app/.kite-passport/config.json" ]; then
+  export KITE_PASSPORT_CONFIG_PATH="/app/.kite-passport/config.json"
+  echo "Exported KITE_PASSPORT_CONFIG_PATH=$KITE_PASSPORT_CONFIG_PATH"
+fi
+
 if [ ! -f "$HOME/.kite-passport/config.json" ] && [ ! -f "/app/.kite-passport/config.json" ]; then
   echo "WARNING: Passport config missing. Mount ~/.kite-passport or set KITE_PASSPORT_CONFIG_PATH to a valid config.json."
 fi

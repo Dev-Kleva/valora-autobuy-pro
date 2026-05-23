@@ -35,8 +35,10 @@ class KitePassport:
         """Load Passport configuration from .kite-passport directory."""
         print("Debug: in _load_config")
         print(f"Debug: cwd = {os.getcwd()}")
-
+        print(f"Debug: HOME = {os.getenv('HOME')}")
         env_config_path = os.getenv("KITE_PASSPORT_CONFIG_PATH") or os.getenv("KITE_PASSPORT_CONFIG_FILE")
+        print(f"Debug: KITE_PASSPORT_CONFIG_PATH = {env_config_path}")
+
         home_config = os.path.expanduser("~/.kite-passport/config.json")
         cwd_config = os.path.join(os.getcwd(), ".kite-passport", "config.json")
 
