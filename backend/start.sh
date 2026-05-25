@@ -9,7 +9,10 @@ echo "Installing Kite Passport..."
 
 curl -fsSL https://agentpassport.ai/install.sh | bash
 
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.kpass/bin:$HOME/.local/bin:$PATH"
+if [ -z "$KITE_PASSPORT_CLI_PATH" ] && [ -x "$HOME/.kpass/bin/kpass" ]; then
+  export KITE_PASSPORT_CLI_PATH="$HOME/.kpass/bin/kpass"
+fi
 
 echo "Checking Kite Passport CLI..."
 if command -v kpass >/dev/null 2>&1; then
