@@ -3,7 +3,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+cd "$SCRIPT_DIR/.."
 
 echo "Installing Kite Passport..."
 
@@ -58,4 +58,4 @@ fi
 echo "Starting backend..."
 
 PORT=${PORT:-8080}
-uvicorn main:app --host 0.0.0.0 --port $PORT
+uvicorn backend.main:app --host 0.0.0.0 --port $PORT
