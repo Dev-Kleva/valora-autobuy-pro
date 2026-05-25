@@ -2,39 +2,53 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
 echo "Installing Kite Passport..."
 
 curl -fsSL https://agentpassport.ai/install.sh | bash
 
 export PATH="$HOME/.local/bin:$PATH"
 
-echo "Initializing Kite Passport..."
-
+echo "Checking Kite Passport CLI..."
 if command -v kpass >/dev/null 2>&1; then
-  kpass init || true
+  kpass version || true
 elif command -v kite-passport >/dev/null 2>&1; then
-  kite-passport init || true
+  kite-passport version || true
 else
   echo "WARNING: kpass CLI not found after install"
 fi
 
 echo "Checking config..."
-ls -la ~/.kite-passport || true
-ls -la /app/.kite-passport || true
+echo "DEBUG: KITE_PASSPORT_CONFIG_JSON length = ${#KITE_PASSPORT_CONFIG_JSON}"
+ls -la "$HOME/.kite-passport" || true
+ls -la "$PWD/.kite-passport" || true
 
-# If Passport config exists in the container home directory, mirror it into /app for the backend.
-if [ -f "$HOME/.kite-passport/config.json" ] && [ ! -f "/app/.kite-passport/config.json" ]; then
-  echo "Copying Passport config from $HOME/.kite-passport to /app/.kite-passport"
-  mkdir -p /app/.kite-passport
-  cp -r "$HOME/.kite-passport/." /app/.kite-passport/
+# If Passport config is provided via env var, create it
+if [ -n "$KITE_PASSPORT_CONFIG_JSON" ]; then
+  echo "Creating Passport config from KITE_PASSPORT_CONFIG_JSON env var"
+  mkdir -p "$PWD/.kite-passport"
+  echo "$KITE_PASSPORT_CONFIG_JSON" > "$PWD/.kite-passport/config.json"
+  echo "✓ Passport config created from env var"
+  ls -la "$PWD/.kite-passport/config.json" || true
+else
+  echo "DEBUG: KITE_PASSPORT_CONFIG_JSON env var is empty or not set"
 fi
 
-if [ -f "/app/.kite-passport/config.json" ]; then
-  export KITE_PASSPORT_CONFIG_PATH="/app/.kite-passport/config.json"
+# If Passport config exists in the container home directory, mirror it into the backend folder.
+if [ -f "$HOME/.kite-passport/config.json" ] && [ ! -f "$PWD/.kite-passport/config.json" ]; then
+  echo "Copying Passport config from $HOME/.kite-passport to $PWD/.kite-passport"
+  mkdir -p "$PWD/.kite-passport"
+  cp -r "$HOME/.kite-passport/." "$PWD/.kite-passport/"
+fi
+
+if [ -f "$PWD/.kite-passport/config.json" ]; then
+  export KITE_PASSPORT_CONFIG_PATH="$PWD/.kite-passport/config.json"
   echo "Exported KITE_PASSPORT_CONFIG_PATH=$KITE_PASSPORT_CONFIG_PATH"
 fi
 
-if [ ! -f "$HOME/.kite-passport/config.json" ] && [ ! -f "/app/.kite-passport/config.json" ]; then
+if [ ! -f "$HOME/.kite-passport/config.json" ] && [ ! -f "$PWD/.kite-passport/config.json" ]; then
   echo "WARNING: Passport config missing. Mount ~/.kite-passport or set KITE_PASSPORT_CONFIG_PATH to a valid config.json."
 fi
 
