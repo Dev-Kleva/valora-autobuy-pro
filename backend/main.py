@@ -308,7 +308,7 @@ async def buy(request: dict, user=Depends(get_current_user)):
     # Enforce budget caps and explicit range constraints (defensive guard)
     budget = float(request.get("budget", 0))
 
-    from agent import parse_price_range
+    from .agent import parse_price_range
     min_price, max_price, _ = parse_price_range(request.get("query", ""), budget)
     max_price = min(max_price, budget)
 
