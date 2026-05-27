@@ -7,14 +7,26 @@ cd "$SCRIPT_DIR/.."
 
 echo "Installing Kite Passport..."
 
+export KPASS_INSTALL_DIR="$HOME/.kpass"
 curl -fsSL https://agentpassport.ai/install.sh | bash
 
-export PATH="$HOME/.kpass/bin:$HOME/.local/bin:$PATH"
-if [ -z "$KITE_PASSPORT_CLI_PATH" ] && [ -x "$HOME/.kpass/bin/kpass" ]; then
-  export KITE_PASSPORT_CLI_PATH="$HOME/.kpass/bin/kpass"
+export PATH="$HOME/.local/bin:$HOME/.kpass/bin:$PATH"
+if [ -z "$KITE_PASSPORT_CLI_PATH" ]; then
+  if [ -x "$HOME/.local/bin/kpass" ]; then
+    export KITE_PASSPORT_CLI_PATH="$HOME/.local/bin/kpass"
+  elif [ -x "$HOME/.kpass/bin/kpass" ]; then
+    export KITE_PASSPORT_CLI_PATH="$HOME/.kpass/bin/kpass"
+  elif command -v kpass >/dev/null 2>&1; then
+    export KITE_PASSPORT_CLI_PATH="$(command -v kpass)"
+  elif command -v kite-passport >/dev/null 2>&1; then
+    export KITE_PASSPORT_CLI_PATH="$(command -v kite-passport)"
+  fi
 fi
 
 echo "Checking Kite Passport CLI..."
+echo "PATH=$PATH"
+command -v kpass || true
+command -v kite-passport || true
 if command -v kpass >/dev/null 2>&1; then
   kpass version || true
 elif command -v kite-passport >/dev/null 2>&1; then

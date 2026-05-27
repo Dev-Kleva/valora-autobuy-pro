@@ -6,6 +6,7 @@ import os
 import json
 import time
 import hashlib
+import shutil
 from dotenv import load_dotenv
 
 # Load environment variables from root .env and backend/.env
@@ -275,4 +276,26 @@ async def health():
     return {
         "status": "healthy",
         "kite": kite_health_check()
+    }
+
+@app.get("/debug")
+async def debug():
+    passport_config_path = os.getenv("KITE_PASSPORT_CONFIG_PATH")
+    env_cli_path = os.getenv("KITE_PASSPORT_CLI_PATH")
+    resolved_cli_path = None
+
+    if env_cli_path and os.path.isfile(env_cli_path) and os.access(env_cli_path, os.X_OK):
+        resolved_cli_path = env_cli_path
+    else:
+        resolved_cli_path = shutil.which("kpass") or shutil.which("kite-passport")
+
+    return {
+        "cwd": os.getcwd(),
+        "home": os.getenv("HOME"),
+        "path": os.getenv("PATH"),
+        "kite_passport_config_path": passport_config_path,
+        "config_exists": bool(passport_config_path and os.path.isfile(passport_config_path)),
+        "kite_passport_cli_path": env_cli_path,
+        "resolved_kpass_path": resolved_cli_path,
+        "kpass_available": bool(resolved_cli_path)
     }
