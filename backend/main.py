@@ -132,23 +132,46 @@ def get_current_user(authorization: str = Header(None)):
 
 @app.post("/register")
 async def register(request: dict):
-    username = request.get("username")
-    password = request.get("password")
+    import traceback
+    DEBUG = os.getenv("DEBUG") == "1"
+    try:
+        username = request.get("username")
+        password = request.get("password")
 
-    user = register_user(username, password)
-    if not user:
-        raise HTTPException(status_code=409, detail="user exists")
+        user = register_user(username, password)
+        if not user:
+            raise HTTPException(status_code=409, detail="user exists")
 
-    token = authenticate_user(username, password)
-    return {"token": token}
+        token = authenticate_user(username, password)
+        return {"token": token}
+    except HTTPException:
+        # Propagate HTTP exceptions (e.g., 409)
+        raise
+    except Exception as e:
+        tb = traceback.format_exc()
+        print(tb)
+        if DEBUG:
+            return JSONResponse(status_code=500, content={"detail": "server error", "error": str(e), "trace": tb})
+        raise HTTPException(status_code=500, detail="server error")
 
 
 @app.post("/login")
 async def login(request: dict):
-    token = authenticate_user(request.get("username"), request.get("password"))
-    if not token:
-        raise HTTPException(status_code=401, detail="invalid credentials")
-    return {"token": token}
+    import traceback
+    DEBUG = os.getenv("DEBUG") == "1"
+    try:
+        token = authenticate_user(request.get("username"), request.get("password"))
+        if not token:
+            raise HTTPException(status_code=401, detail="invalid credentials")
+        return {"token": token}
+    except HTTPException:
+        raise
+    except Exception as e:
+        tb = traceback.format_exc()
+        print(tb)
+        if DEBUG:
+            return JSONResponse(status_code=500, content={"detail": "server error", "error": str(e), "trace": tb})
+        raise HTTPException(status_code=500, detail="server error")
 
 
 @app.get("/me")

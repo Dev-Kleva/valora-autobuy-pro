@@ -12,8 +12,15 @@ if not DB_PATH:
 
 def init_db():
     """Initialize database with users and sessions tables"""
-    conn = sqlite3.connect(DB_PATH)
+    # Open with a longer timeout and allow access from multiple threads/processes
+    conn = sqlite3.connect(DB_PATH, timeout=30, check_same_thread=False)
     cursor = conn.cursor()
+    # Reduce locking contention by enabling WAL journal mode
+    try:
+        cursor.execute("PRAGMA journal_mode=WAL;")
+    except Exception:
+        # If PRAGMA fails, continue; WAL may not be supported on every filesystem
+        pass
     
     # Users table
     cursor.execute("""
@@ -45,7 +52,7 @@ init_db()
 
 def register_user(username: str, password: str):
     try:
-        conn = sqlite3.connect(DB_PATH)
+        conn = sqlite3.connect(DB_PATH, timeout=30, check_same_thread=False)
         cursor = conn.cursor()
         user_id = str(uuid.uuid4())
         cursor.execute(
@@ -64,7 +71,7 @@ def register_user(username: str, password: str):
 
 
 def authenticate_user(username: str, password: str):
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30, check_same_thread=False)
     cursor = conn.cursor()
     cursor.execute("SELECT id FROM users WHERE username = ? AND password = ?", (username, password))
     user = cursor.fetchone()
@@ -81,7 +88,7 @@ def authenticate_user(username: str, password: str):
 
 
 def get_user_by_token(token: str) -> Optional[dict]:
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30, check_same_thread=False)
     cursor = conn.cursor()
     cursor.execute(
         "SELECT u.id, u.username FROM users u JOIN sessions s ON u.username = s.username WHERE s.token = ?",
