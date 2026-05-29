@@ -11,6 +11,12 @@ export KPASS_INSTALL_DIR="$HOME/.kpass"
 curl -fsSL https://agentpassport.ai/install.sh | bash
 
 export PATH="$HOME/.local/bin:$HOME/.kpass/bin:$PATH"
+# If the environment provided a path that contains variables (e.g. "$HOME/.kpass/bin/kpass"), expand them here
+if [ -n "$KITE_PASSPORT_CLI_PATH" ]; then
+  # eval echo will expand $HOME, ~, and other env vars in the value
+  EXPANDED_CLI_PATH=$(eval echo $KITE_PASSPORT_CLI_PATH)
+  export KITE_PASSPORT_CLI_PATH="$EXPANDED_CLI_PATH"
+fi
 if [ -z "$KITE_PASSPORT_CLI_PATH" ]; then
   if [ -x "$HOME/.local/bin/kpass" ]; then
     export KITE_PASSPORT_CLI_PATH="$HOME/.local/bin/kpass"

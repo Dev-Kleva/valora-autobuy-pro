@@ -167,8 +167,11 @@ class KitePassport:
             pass
 
         env_path = os.getenv("KITE_PASSPORT_CLI_PATH")
-        if env_path and os.path.isfile(env_path) and os.access(env_path, os.X_OK):
-            return env_path
+        if env_path:
+            # Expand environment variables and user (~) so values like "$HOME/.kpass/bin/kpass" work
+            env_path_expanded = os.path.expanduser(os.path.expandvars(env_path))
+            if os.path.isfile(env_path_expanded) and os.access(env_path_expanded, os.X_OK):
+                return env_path_expanded
 
         for candidate_name in ("kpass", "kpass.exe"):
             candidate = shutil.which(candidate_name)
